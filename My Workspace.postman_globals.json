@@ -1,0 +1,59 @@
+{
+	"id": "47e783af-3e96-4224-844b-332b9b9543f2",
+	"values": [
+		{
+			"key": "CPage",
+			"value": "0",
+			"enabled": true
+		},
+		{
+			"key": "PSize",
+			"value": "20",
+			"enabled": true
+		},
+		{
+			"key": "Show",
+			"value": "All",
+			"enabled": true
+		},
+		{
+			"key": "Sort",
+			"value": "name-desc",
+			"enabled": true
+		},
+		{
+			"key": "Fields",
+			"value": "FULL",
+			"enabled": true
+		},
+		{
+			"key": "Lang",
+			"value": "en",
+			"enabled": true
+		},
+		{
+			"key": "Terms",
+			"value": "true",
+			"enabled": true
+		},
+		{
+			"key": "Reference",
+			"value": "CROSSELLING",
+			"enabled": true
+		},
+		{
+			"key": "Client",
+			"value": "customer_group",
+			"enabled": true
+		},
+		{
+			"key": "Secret",
+			"value": "secret",
+			"enabled": true
+		}
+	],
+	"name": "My Workspace Globals",
+	"_postman_variable_scope": "globals",
+	"_postman_exported_at": "2019-08-08T11:44:37.423Z",
+	"_postman_exported_using": "Postman/7.3.6"
+}

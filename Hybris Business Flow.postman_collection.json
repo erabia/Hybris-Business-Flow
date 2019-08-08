@@ -1,0 +1,6204 @@
+{
+	"info": {
+		"_postman_id": "a1984306-2bf8-464b-b5e0-6d5e84375284",
+		"name": "Hybris Business Flow",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Catalog Controller",
+			"item": [
+				{
+					"name": "getCatalogs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f1d3cc72-1a3c-4286-bb9f-7b1b91b6b4f1",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"for (let i=0; i<response.catalogs.length; i++){",
+									"    for (let j =0; j<response.catalogs[i].catalogVersions.length;j++){",
+									"        tests[\"Validate catalog version includes Staged or Online\"]=(response.catalogs[i].catalogVersions[j].id.includes(\"Online\") === true || response.catalogs[i].catalogVersions[j].id.includes(\"Staged\") === true);",
+									"   }",
+									"}",
+									"",
+									"pm.test(\"Set enviromental variables (CatalogID, CatalogVersion, Categories and SubCategories)\", function () {",
+									"    ",
+									"    if (\"CatalogID\", response.catalogs[0].id !== null){",
+									"        pm.environment.set(\"CatalogID\", response.catalogs[0].id);",
+									"        pm.environment.set(\"CatalogVersion\", response.catalogs[0].catalogVersions[1].id);",
+									"        pm.environment.set(\"Categories\", response.catalogs[0].catalogVersions[1].categories[2].id);",
+									"        pm.environment.set(\"SubCategories\", response.catalogs[0].catalogVersions[1].categories[2].subcategories[2].id);",
+									"    } else {",
+									"        pm.expect.fail();",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/catalogs?fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"catalogs"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. Fields: DEFAULT or FULL\n2. Lang (language) en OR ar\n3. This API set CatalogID: Catalog ID as global variabl\n\n\n\n1. This API set CatalogID, CatalogVersion and Categories as enviromental variable"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Home Page, Search & Product Listing",
+			"item": [
+				{
+					"name": "Get Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9afa733e-1fb9-44ac-b75d-e79916e603c6",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"let Sub;",
+									"",
+									"for (var i=0; i<response.subcategories.length;i++){",
+									"    for (var j=0; j<response.subcategories[i].subcategories.length; j++){",
+									"        tests[\"Validate Subcategory is not empty\"]=(response.subcategories[i].subcategories[j].id !==\"\" && response.subcategories[i].subcategories[j].id !== null);",
+									"    }",
+									"}",
+									"    ",
+									"pm.test(\"Set Subcategory variable\", function(){",
+									"        pm.environment.set(\"Subcategories\", response.subcategories[2].subcategories[1].id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "e3719709-536b-4379-9ffe-ec1d722c032c",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/catalogs/{{CatalogID}}/{{CatalogVersion}}/categories/{{Categories}}?fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"catalogs",
+								"{{CatalogID}}",
+								"{{CatalogVersion}}",
+								"categories",
+								"{{Categories}}"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. CatalogID you can get from \"Catalogs Controller\" (getCatalogs)\n2. CatalogVersion you can get from \"Catalogs Controller\" (getCatalogss)\n3. Categories you can get from \"Catalogs Controller\" (getCatalogs)\n4. Lang: language: ar OR en\n5. Fields: FULL or DEFAULT\n\n\n\n1. This API set SubCategory: Sub-Category ID as global variable"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Products Category (Product Listing Page Service)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "cee5f879-00d9-426c-ba2a-353dd163255e",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"//tests[\"Validate access_token is not empty or null\"]=(response ===\"\" && response === null);",
+									"",
+									"for (var i=0; i<response.products.length; i++){",
+									"    tests[\"Validate product code is not empty or null\"]=(response.products[i].code !==\"\" && response.products[i].code !== null);",
+									"}",
+									"",
+									"pm.test(\"Set PCode variable\", function () {",
+									"    pm.environment.set(\"PCode\", response.products[0].code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/products/category/search?categoryCode={{Categories}}&query={{Query}}&currentPage={{CPage}}&pageSize={{PSize}}&show={{Show}}&sort={{Sort}}&fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"products",
+								"category",
+								"search"
+							],
+							"query": [
+								{
+									"key": "categoryCode",
+									"value": "{{Categories}}"
+								},
+								{
+									"key": "query",
+									"value": "{{Query}}"
+								},
+								{
+									"key": "currentPage",
+									"value": "{{CPage}}"
+								},
+								{
+									"key": "pageSize",
+									"value": "{{PSize}}"
+								},
+								{
+									"key": "show",
+									"value": "{{Show}}"
+								},
+								{
+									"key": "sort",
+									"value": "{{Sort}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. CCode: Category Code global variable set through Get Category\n2. CPage: Current Page\n3. PSize: Page size\n4. Show: All or Page\n5. Sort: name-desc OR name-asc\n6. Fields: DEFAULT or FULL\n7. Lang: en OR ar\n\n\n1. This API set PCode (Product Code) as enviromental variable"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Products Category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "4a7d26c5-5c59-4cbe-ac1c-37459dae2a34",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Check if response has breadcrumbs\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"breadcrumbs\");",
+									"    if (response.products.length === 0){",
+									"        pm.expect.fail();",
+									"    }",
+									"});",
+									"",
+									"for (var i=0; i<response.products.length; i++){",
+									"    tests[\"Validate product code is not empty or null\"]=(response.products[i].code !==\"\" && response.products[i].code !== null);",
+									"}",
+									"",
+									"pm.test(\"Set PCode variable\", function () {",
+									"    pm.environment.set(\"PCode\", response.products[0].code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/products/category/search?categoryCode={{Categories}}&query={{Query}}&currentPage={{CPage}}&pageSize={{PSize}}&show={{Show}}&sort={{Sort}}&fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"products",
+								"category",
+								"search"
+							],
+							"query": [
+								{
+									"key": "categoryCode",
+									"value": "{{Categories}}"
+								},
+								{
+									"key": "query",
+									"value": "{{Query}}"
+								},
+								{
+									"key": "currentPage",
+									"value": "{{CPage}}"
+								},
+								{
+									"key": "pageSize",
+									"value": "{{PSize}}"
+								},
+								{
+									"key": "show",
+									"value": "{{Show}}"
+								},
+								{
+									"key": "sort",
+									"value": "{{Sort}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. CCode: Category Code variable set through Get Category\n2. CPage: Current Page\n3. PSize: Page size\n4. Show: All or Page\n5. Sort: name-desc OR name-asc\n6. Fields: DEFAULT or FULL\n7. Lang: en OR ar\n\n\n1. This API set PCode (Product Code) as enviromental variable"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Register",
+			"item": [
+				{
+					"name": "Get Titles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "34151a86-cfb7-4cd8-aa73-e92af97852ab",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Check title result\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"mrs\");",
+									"});",
+									"",
+									"for (var i=0; i<response.titles.length;i++){",
+									"        tests[\"Validate Title is not empty\"]=(response.titles[i].code !==\"\" && response.titles[i].code !== null);",
+									"}",
+									"    ",
+									"pm.test(\"Set title code and value\", function () {",
+									"    pm.environment.set(\"Title\", response.titles[1].code);",
+									"    pm.environment.set(\"TitleValue\", response.titles[1].name);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/titles?fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"titles"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. Fields: DEFAULT or FULL\n \n\n\n1. This API set Title, TitleValue as global variable"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Gender",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "07d7472b-d311-4dfa-938f-53613ce92b6e",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Check gender result\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"MALE\");",
+									"    pm.expect(pm.response.text()).to.include(\"FEMALE\");",
+									"});",
+									"",
+									"for (var i=0; i<response.genders.length;i++){",
+									"        tests[\"Validate genders is not empty\"]=(response.genders[i].code !==\"\" && response.genders[i].code !== null);",
+									"}",
+									"",
+									"pm.test(\"Set gender code and value\", function () {",
+									"    pm.environment.set(\"GenderCode\", response.genders[1].code);",
+									"    pm.environment.set(\"Gender\", response.genders[1].name);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/gender?fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"gender"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. Fields: DEFAULT or FULL\n\n1. This API set Gender as global variable"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Countries (Register Mobile Countries)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3fde8aa7-3200-422f-b9c8-2f6d4eb81557",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Validate mobile country\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"AD\");",
+									"});",
+									"",
+									"for (var i=0; i<response.countries.length;i++){",
+									"        tests[\"Validate countries is not empty\"]=(response.countries[i].isdCode !==\"\" && response.countries[i].isdCode !== null);",
+									"}",
+									"    ",
+									"pm.test(\"Set eenvironment variables (MCC, isdCode, isdCode, CountryName and Mob\", function () {",
+									"    // 192: KSA, 1: UAE",
+									"    pm.environment.set(\"MCC\", response.countries[1].isocode);",
+									"    pm.environment.set(\"isdCode\", response.countries[1].isdCode);",
+									"    //pm.environment.set(\"isoCode\", response.countries[1].isocode);",
+									"    pm.environment.set(\"CountryName\", response.countries[1].name);",
+									"    pm.environment.set(\"Mob\", response.countries[1].mobileExample.split(\" \").join(\"\"));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/mobile-countries/register?fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"mobile-countries",
+								"register"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. Fields: DEFAULT or FULL\r\n2. Lang (Language) en OR ar\r\n \r\n\r\n1. This API set MCC (Mobile Country Code), isdCode, isoCode and CountryName as global variable\r\n2. This API set Mob (Mobile) as envromental variable, you should adjust to remove the spaces"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Nationality",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "60375c1c-93b3-48f7-b09e-e4bb2b74cda0",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"//0 Emarati",
+									"//22 Jordanian",
+									"//044 Saudi",
+									"",
+									"tests[\"Validate countries is not empty\"]=(pm.response.text() !==\"\" && pm.response.text() !== null);",
+									"",
+									"pm.test(\"Validate nationality\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"Emarati\");",
+									"});",
+									"    ",
+									"pm.test(\"Set nationality variable\", function () { ",
+									"    pm.environment.set(\"Nationality\", response.nationalities[22].code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/nationality?fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"nationality"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. Fields: DEFAULT or FULL\r\n2. Lang (Language) en OR ar\r\n \r\n\r\n1. This API set Nationality as global variable"
+					},
+					"response": []
+				},
+				{
+					"name": "Validate User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "51f3718b-ff44-4e06-a0d7-e9c8dd0667bc",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201,202]);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"tests[\"Validate countries is not empty\"]=(pm.response.text() !==\"\" && pm.response.text() !== null);",
+									"",
+									"pm.test(\"Validate response\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"login\");",
+									"    pm.expect(pm.response.text()).to.include(pm.environment.get(\"UserID\"));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/uservalidate?login={{UserID}}&password={{Password}}&firstName={{FName}}&lastName={{LName}}&dateOfBirth={{DOB}}&accountType={{AccType}}&mobileCountryCode={{MCC}}&mobileNumber={{Mob}}&termsAndConditions={{Terms}}&nationalityCode={{Nationality}}&fields={{Fields}}&titleCode={{Title}}&genderCode={{GenderCode}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"uservalidate"
+							],
+							"query": [
+								{
+									"key": "login",
+									"value": "{{UserID}}"
+								},
+								{
+									"key": "password",
+									"value": "{{Password}}"
+								},
+								{
+									"key": "firstName",
+									"value": "{{FName}}"
+								},
+								{
+									"key": "lastName",
+									"value": "{{LName}}"
+								},
+								{
+									"key": "dateOfBirth",
+									"value": "{{DOB}}"
+								},
+								{
+									"key": "accountType",
+									"value": "{{AccType}}"
+								},
+								{
+									"key": "mobileCountryCode",
+									"value": "{{MCC}}"
+								},
+								{
+									"key": "mobileNumber",
+									"value": "{{Mob}}"
+								},
+								{
+									"key": "termsAndConditions",
+									"value": "{{Terms}}"
+								},
+								{
+									"key": "nationalityCode",
+									"value": "{{Nationality}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "titleCode",
+									"value": "{{Title}}"
+								},
+								{
+									"key": "genderCode",
+									"value": "{{GenderCode}}"
+								}
+							]
+						},
+						"description": "1. Title: Global variable set through Get Titles API\n2. FName: First Name\n3. LName: Last Name\n4. DOB: Date of birth (DD/MM/YYYY)\n5. AccType: Account Type: INDIVIDUAL or BUSINESS\n6. Gender: Global variable set through Get All Gender API\n7. MCC: Mobile Country Code Global variable set through [Get All Countries (Register Mobile Countries)] API\n8. Mob: Mobile number\n8. Terms: Terms and conditions --> true OR false\n9. Nationality: Global variable set through Get All Nationality API\n10. Fields: DEFAULT or FULL"
+					},
+					"response": []
+				},
+				{
+					"name": "Send Verification Code OTP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9cd71c3c-2ead-4305-b9a1-318c7dc0ba2d",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+									"});",
+									"",
+									"pm.test(\"Body matches string\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"Verification code sent successfully\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/otpverify/sendverify?countryCode={{MCC}}&mobileNumber={{Mob}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"otpverify",
+								"sendverify"
+							],
+							"query": [
+								{
+									"key": "countryCode",
+									"value": "{{MCC}}"
+								},
+								{
+									"key": "mobileNumber",
+									"value": "{{Mob}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Code OTP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b1d7672b-1503-4272-a53f-3aa97569fbd2",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200]);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Valid OTP\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"The code verified successfully\");",
+									"});",
+									"",
+									"",
+									"pm.test(\"Invalid OTP\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"OTPError\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/otpverify/verifycode?countryCode={{MCC}}&mobileNumber={{Mob}}&code={{OTP}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"otpverify",
+								"verifycode"
+							],
+							"query": [
+								{
+									"key": "countryCode",
+									"value": "{{MCC}}"
+								},
+								{
+									"key": "mobileNumber",
+									"value": "{{Mob}}"
+								},
+								{
+									"key": "code",
+									"value": "{{OTP}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ea378a82-8cbf-4a65-a001-83de0cee995b",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201,202]);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Validate successful registration\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"access_token\");",
+									"    pm.expect(pm.response.text()).to.include(\"customerId\");",
+									"});",
+									"    ",
+									"pm.test(\"Set variables (Token and CustomerID)\", function () {",
+									"    if(response.access_token !== null){",
+									"        pm.environment.set(\"Token\", response.access_token);",
+									"        pm.environment.set(\"CustomerID\", response.customerId);",
+									"    } else {",
+									"        pm.expect.fail();",
+									"    }",
+									"    ",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n   \"accountType\": \"{{AccType}}\", \n   \"ageGroup\": \"{{AgeGroups}}\",\n   \"countryOfResidence\":\"{{CountryName}}\",\n   \"dateOfBirth\": \"{{DOB}}\", \n   \"didSubscribe\": true,\n   \"firstName\": \"{{FName}}\", \n   \"genderCode\": \"{{GenderCode}}\", \n   \"lastName\": \"{{LName}}\", \n   \"mobileCountryCode\": \"JO\", \n   \"mobileNumber\": \"0788609094\", \n   \"nationalityCode\": \"{{Nationality}}\",\n   \"orderReferralCode\": \"\",\n   \"password\": \"{{Password}}\", \n   \"phoneNumber\": \"{{Mob}}\",\n   \"socialMediaId\": \"{{SocialMediaId}}\",\n   \"termsAndConditions\": true, \n   \"titleCode\": \"{{Title}}\", \n   \"uid\": \"{{UserID}}\" \n }"
+						},
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users-body?fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users-body"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. Header:: Fields: DEFAULT or FULL\n\n2. Body:\n1. AccType: Account Type INDIVIDUAL or BUSINESS\n2. DOB: Date of birth (DD/MM/YYYY)\n3. FName: First Name\n4. Gender: Global variable set through Get All Gender API\n4. LName: Last Name\n5. MCC: Mobile Country Code Global variable set through [Get All Countries (Register Mobile Countries)] API\n6. Mob: Mobile number\n7. Title: Global variable set through Get Titles API\n8. AgeGroups: Global variable set through \"Get Groups Of Ages\" API\n9. CountryName: Global variable set through \"Get Country Of Residence\" API\n______________________________________________________________________________________________________________________________\n\nBody\n\n{ \n   \"accountType\": \"{{AccType}}\", \n   \"ageGroup\": \"{{AgeGroups}}\",\n   \"countryOfResidence\":\"{{CountryName}}\",\n   \"dateOfBirth\": \"{{DOB}}\", \n   \"didSubscribe\": true,\n   \"firstName\": \"{{FName}}\", \n   \"genderCode\": \"{{Gender}}\", \n   \"lastName\": \"{{LName}}\", \n   \"mobileCountryCode\": \"{{MCC}}\", \n   \"mobileNumber\": \"{{Mob}}\", \n   \"orderReferralCode\": \"{{ReferralCode}}\",\n   \"password\": \"{{Password}}\", \n   \"phoneNumber\": \"{{Mob}}\",\n   \"socialMediaId\": \"\",\n   \"termsAndConditions\": true, \n   \"titleCode\": \"{{Title}}\", \n   \"uid\": \"{{UserID}}\" \n }"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product Details",
+			"item": [
+				{
+					"name": "Get Product By Code",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "1d8eb611-3aae-4246-af9d-b5fcc428d68a",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Validate the product\", function () {",
+									"    pm.expect(pm.response.text()).to.include(pm.environment.get(\"PCode\"));",
+									"});",
+									"",
+									"//pm.test(\"Set variant product\", function () {",
+									"    //console.log(response.variantOptions[0].code);",
+									"    //pm.environment.set(\"Variant\", response.variantOptions[0].code);",
+									"//});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/products/{{PCode}}?fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"products",
+								"{{PCode}}"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. PCode (Product Code): Global variable set through Search Products API\n2. Fields: DEFAULT or FULL\n\n\n\n1. This API set the PCode (Product Code) with the variant value as global variable"
+					},
+					"response": []
+				},
+				{
+					"name": "Product References",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e4234db8-e9a6-427b-bb6f-de2e93d88d8a",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Validate the product references\", function () {",
+									"    pm.expect(response.value).to.not.be.null;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/products/{{PCode}}/references?pageSize={{PSize}}&fields={{Fields}}&referenceType={{Reference}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"products",
+								"{{PCode}}",
+								"references"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "{{PSize}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "referenceType",
+									"value": "{{Reference}}"
+								}
+							]
+						},
+						"description": "1. PSize: Page size\n2. Fields: DEFAULT or FULL\n_________________________________________________\n Reference: \n1. ACCESSORIES,\n2. BASE_PRODUCT,\n3. CONSISTS_OF,\n4. DIFF_ORDERUNIT,\n5. FOLLOWUP,\n6. MANDATORY,\n7. SIMILAR,\n8. SELECT,\n9. SPAREPART,\n10. OTHERS,\n11. UPSELLING,\n12. CROSSELLING\n_________________________________________________\n\nKAF: Reference: CROSSELLING"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Review",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9de94434-e4b7-4765-8936-33572963c55d",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201,202]);",
+									"    ",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Your test name\", function () {",
+									"    pm.environment.set(\"TestReview\", response.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n \"alias\": \"{{Alias}}\", \n \"comment\": \"{{Comment}}\", \n \"headline\": \"{{Headline}}\", \n \"rating\": 2.5 \n }"
+						},
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/products/{{PCode}}/reviews?fields={{Fields}}&access_token={{Token}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"products",
+								"{{PCode}}",
+								"reviews"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								}
+							]
+						},
+						"description": "1. PCode (Product Code): Global variable set through Search Products API\n2. Token: you can get from \"Customer Oauth\"\n\n\n1. This API set \"TestReview\""
+					},
+					"response": []
+				},
+				{
+					"name": "Product Reviews",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b6953d82-9d10-45be-9a6e-3c8dfd4d3dba",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Validate the review\", function (){",
+									"    for(var i=0; i<response.reviews.length;i++){",
+									"        if (pm.environment.get(\"TestReview\") !== null){",
+									"            pm.expect(response.reviews[i].id).to.eql(pm.environment.get(\"TestReview\"));",
+									"        } else {",
+									"            pm.expect.fail();",
+									"        }",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/products/{{PCode}}/reviews?fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"products",
+								"{{PCode}}",
+								"reviews"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. PCode (Product Code): Global variable set through Search Products API\r\n2. Fields: DEFAULT or FULL\r\n3. Lang (Language): ar OR en\r\n\r\n\r\n1. User has to approve the review before running this API"
+					},
+					"response": []
+				},
+				{
+					"name": "Product Stock Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "652a8c9d-6f8e-4838-b735-f26f314a6fee",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Validate response\", function () {",
+									"    if(response.stockLevel === 0){",
+									"        pm.expect.fail();",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/products/{{PCode}}/stock/{{StoreName}}?fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"products",
+								"{{PCode}}",
+								"stock",
+								"{{StoreName}}"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. PCode (Product Code): Global variable set through Search Products API\r\n2. StoreName: you can get from \"Location Search\" API\r\n3. Fields: DEFAULT or FULL"
+					},
+					"response": []
+				},
+				{
+					"name": "Product Stock Data Available",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "446d16ad-e407-4df6-9a1b-e54185f4cbb9",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Validate response\", function () {",
+									"    if(response.stockLevel === 0){",
+									"        pm.expect.fail();",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/products/{{Variant}}/stock/available?fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"products",
+								"{{Variant}}",
+								"stock",
+								"available"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. PCode (Product Code): Global variable set through Search Products API\n2. Fields: DEFAULT or FULL"
+					},
+					"response": []
+				},
+				{
+					"name": "Stock Level Based to multi products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3314166a-9476-4ab3-98bf-36dc7e3fae91",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Validate response stock\", function () {",
+									"    for (i=0; i<response.stocks.length;i++){",
+									"        if(response.stocks[i].stockLevel === 0){",
+									"            pm.expect.fail();",
+									"        }",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n   \"stocks\": [ \n     { \n       \"productCode\": \"{{PCode}}\", \n       \"stockLevel\": 10, \n       \"stockLevelStatus\": \"Available\" \n     } \n   ] \n }"
+						},
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/products/stock/available?fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"products",
+								"stock",
+								"available"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. Fields: DEFAULT or FULL\n2. PCode (Product Code) is set from \"Get Product By Code\" API"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Suggestions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "3989a3bc-9662-420a-b9d8-ddcb469abb54",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Validate the query with suggestion value\", function () {",
+									"    if (pm.expect(response.suggestions[0].value).to.include(pm.environment.get(\"Query\").toLowerCase()) === false){",
+									"        pm.expect.fail();",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/products/suggestions?term={{Query}}&max={{Max}}&fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"products",
+								"suggestions"
+							],
+							"query": [
+								{
+									"key": "term",
+									"value": "{{Query}}"
+								},
+								{
+									"key": "max",
+									"value": "{{Max}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. Fields: DEFAULT or FULL\n2. Lang (Language): en OR ar"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Wishlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "448b256d-d3ed-4a29-944e-afd588ba4205",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"//var jsonData = JSON.parse(responseBody);",
+									"const response = pm.response.json();",
+									"",
+									"tests[\"Validate access_token is not empty or null\"]=(response ===\"\" && response === null);",
+									"",
+									"//pm.environment.set(\"WLPK\", response.wishlists[0].pk);",
+									"",
+									"//pm.test(\"Set wishlist PK\", function () {",
+									"    //if (response === null){",
+									"        //pm.expect.fail();",
+									"    //} else {",
+									"        //pm.environment.set(\"WLPK\", response.wishlists[0].pk);",
+									"    //}",
+									"//});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/wishlists?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"wishlists"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. Token: you can get from \"Customer Oauth\" API\n2. Fields: DEFAULT or FULL\n3. Lang (Language): ar OR en\n\n\n1. This API set WLPK (Wish list PK) as global variable"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Wishlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "048686b9-79dc-47e0-94a2-e46be32e06bc",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201,202]);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Validate WLName\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"name\");",
+									"    pm.expect(pm.response.text()).to.include(response.name);",
+									"});",
+									"",
+									"pm.test(\"Set WLPK\", function () {",
+									"    pm.environment.set(\"WLPK\", response.pk);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "ce2a41b2-9dc7-42fb-92b3-5886be3407f0",
+								"exec": [
+									"pm.environment.set(\"WLName\", \"Sondos2\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n   \"name\": \"{{WLName}}\"\n }"
+						},
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/wishlists?access_token={{Token}}&fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"wishlists"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. Token: you can get from \"Customer Oauth\" API\r\n2. Fields: DEFAULT or FULL\r\n\r\n\r\n1. This API set WLPK (Wish list PK) as global variable"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Wishlist Entry",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "08824c90-691d-42aa-ad15-2b5ab2f83209",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201,202]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/wishlists/{{WLPK}}/wishlist-entries/{{PCode}}?access_token={{Token}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"wishlists",
+								"{{WLPK}}",
+								"wishlist-entries",
+								"{{PCode}}"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								}
+							]
+						},
+						"description": "1. WLPK (Wish list PK) you can get from \"Get User Wishlist\" or \"Create Wishlist\"\r\n2. PCode (Product code)\r\n3. Token: you can get from \"Customer Oauth\" API"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Add to Cart",
+			"item": [
+				{
+					"name": "Get Carts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b9a35a-9f18-4900-9794-c7f660a82161",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.globals.set(\"Cart\", response.carts[0].code);",
+									"    pm.globals.set(\"Guid\", response.carts[0].guid);",
+									"    pm.globals.set(\"Entry\", response.carts[0].entries[0].entryNumber);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts?fields={{Fields}}&access_token={{Token}}&savedCartsOnly={{SavedCartsOnly}}&currentPage={{CPage}}&pageSize={{PSize}}&sort={{Sort}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"carts"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "savedCartsOnly",
+									"value": "{{SavedCartsOnly}}"
+								},
+								{
+									"key": "currentPage",
+									"value": "{{CPage}}"
+								},
+								{
+									"key": "pageSize",
+									"value": "{{PSize}}"
+								},
+								{
+									"key": "sort",
+									"value": "{{Sort}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. Fields: FULL or DEFAULT or SIMPLE\n2. Token: you can get from \"Customer Oauth\" API\n3. SavedCartsOnly\" true OR false\n4. CPage: current page\n5. PSize: Page size\n6. Lang: en OR ar\n\n\n\n1. This API set Cart, Guid and Entry as golbal variables"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "0e393f7d-907c-4736-a94b-984d2b97ed57",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Successful POST request\", function () {",
+									"    const response = pm.response.json();",
+									"        pm.globals.set(\"Cart\", response.code);",
+									"        pm.globals.set(\"Guid\", response.guid);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts?fields={{Fields}}&access_token={{Token}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"carts"
+							],
+							"query": [
+								{
+									"key": "oldCartId",
+									"value": "{{OldCartId}}",
+									"disabled": true
+								},
+								{
+									"key": "toMergeCartGuid",
+									"value": "{{ToMergeCartGuid}}",
+									"disabled": true
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								}
+							]
+						},
+						"description": "1. Registered user\n1.1. Fields: FULL or DEFAULT\n1.2. Token: you can get from \"Customer Oauth\" API\n1.3. Note: You have to remove \"OldCartId\" and \"toMergeCartGuid\"\n\n2. Anonymous user"
+					},
+					"response": []
+				},
+				{
+					"name": "Add To Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "be042448-ab23-45ef-aed0-44e1f3c6ff59",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Body matches string\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"statusCode\");",
+									"    pm.expect(pm.response.text()).to.include(\"success\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/entry?code={{PCode}}&access_token={{Token}}&qty={{QTY}}&pickupStore={{PickupStore}}&fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"carts",
+								"{{Cart}}",
+								"entry"
+							],
+							"query": [
+								{
+									"key": "code",
+									"value": "{{PCode}}"
+								},
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "qty",
+									"value": "{{QTY}}"
+								},
+								{
+									"key": "pickupStore",
+									"value": "{{PickupStore}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. PCode (Product code): you can get from \"Search Products Category (Product Listing Page Service)\" API\n2. QTY: quantity\n3. PickupStore\n4. Fields: FULL or DEFAULT"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cart",
+			"item": [
+				{
+					"name": "Cart Session",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b1dcddd5-02ba-436e-a9e5-c596968c2174",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/sessioncart?access_token={{Token}}&restore={{Restore}}&fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"sessioncart"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "restore",
+									"value": "{{Restore}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. Token: you can get from \"Customer Oauth\" API\n2. Fields: FULL or DEFAULT\n3. Restore: true OR false\n3. Lang (Language): en OR ar"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Vouchers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b259e99c-3afb-41c2-b244-527e1f33a20a",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    const response = pm.response.json();",
+									"    ",
+									"    pm.response.to.have.status(200);",
+									"    ",
+									"    pm.environment.set(\"VID\", response.vouchers[0].code);",
+									"});",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/vouchers?access_token={{Token}}&fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"carts",
+								"{{Cart}}",
+								"vouchers"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. Cart you can get from \"Get Carts\" and \"Create Cart\"\n2. Token you can get from \"Customer Oauth\"\n3. Fields: DEFAULT or FULL\n\n\n1. This API set VID (Voucher ID) as enviromental value"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Carts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26b9a35a-9f18-4900-9794-c7f660a82161",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    const response = pm.response.json();",
+									"    ",
+									"    pm.response.to.have.status(200);",
+									"    ",
+									"    pm.globals.set(\"Cart\", response.carts[0].code);",
+									"    pm.globals.set(\"Guid\", response.carts[0].guid);",
+									"    pm.globals.set(\"Entry\", response.carts[0].entries[0].entryNumber);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts?fields={{Fields}}&access_token={{Token}}&savedCartsOnly={{SavedCartsOnly}}&currentPage={{CPage}}&pageSize={{PSize}}&sort={{Sort}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"carts"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "savedCartsOnly",
+									"value": "{{SavedCartsOnly}}"
+								},
+								{
+									"key": "currentPage",
+									"value": "{{CPage}}"
+								},
+								{
+									"key": "pageSize",
+									"value": "{{PSize}}"
+								},
+								{
+									"key": "sort",
+									"value": "{{Sort}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. Fields: FULL or DEFAULT or SIMPLE\r\n2. Token: you can get from \"Customer Oauth\" API\r\n3. SavedCartsOnly\" true OR false\r\n4. CPage: current page\r\n5. PSize: Page size\r\n6. Lang: en OR ar\r\n\r\n\r\n\r\n1. This API set Cart, Guid and Entry as golbal variables"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Cart By Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "26fbad0f-991e-4ec6-818d-50aa38b55d26",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"carts",
+								"{{Cart}}"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. Cart you can get from \"Get Carts\" and \"Create Cart\"\r\n2. Token you can get from \"Customer Oauth\"\r\n3. Fields: DEFAULT or FULL\r\n4. Lang (Language): en OR ar"
+					},
+					"response": []
+				},
+				{
+					"name": "Set Cart Entry",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"quantity\": 5}"
+						},
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/entries/{{Entry}}?fields={{Fields}}&access_token={{Token}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"carts",
+								"{{Cart}}",
+								"entries",
+								"{{Entry}}"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								}
+							]
+						},
+						"description": "1. Cart you can get from \"Get Carts\" and \"Create Cart\"\r\n2. Fields: DEFAULT or FULL\r\n3. Lang (Language): en OR ar"
+					},
+					"response": []
+				},
+				{
+					"name": "Apply Voucher",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ad040eca-426e-48ac-9567-e0ea3a779535",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/vouchers?voucherId={{VID}}&access_token={{Token}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"carts",
+								"{{Cart}}",
+								"vouchers"
+							],
+							"query": [
+								{
+									"key": "voucherId",
+									"value": "{{VID}}"
+								},
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Voucher",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "74ee6bf6-2eed-44cb-a66d-cf9781e0805c",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200,202]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/vouchers/{{VID}}?access_token={{Token}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"carts",
+								"{{Cart}}",
+								"vouchers",
+								"{{VID}}"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Cart Entry",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2a291544-723f-4a55-bb2c-ef68d1ed2158",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([202,200]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/entries/{{Entry}}?access_token={{Token}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"carts",
+								"{{Cart}}",
+								"entries",
+								"{{Entry}}"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Cart",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b0d47c25-9ed5-4e03-9c79-5fa23a42d792",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([202,200]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}?access_token={{Token}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"carts",
+								"{{Cart}}"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Wish list",
+			"item": [
+				{
+					"name": "Get User Wishlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "d5f4f972-9258-478f-b212-bce90054700c",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Set wishlist PK\", function () {",
+									"    ",
+									"    const response = pm.response.json();",
+									"    ",
+									"    pm.globals.set(\"WLPK\", response.wishlists[0].pk);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/wishlists?access_token={{Token}}&fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"wishlists"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. Token: global variable you can get from \"Customer Oauth\"\n2. Fields: DEFAULT or FULL\n\n\n1. This API set WLPK (Wishlist PK) as global variable"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Wishlist By User ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ff4c3e2f-23ae-4d78-a1b0-60e911dadb9b",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/wishlists/{{WLPK}}?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"wishlists",
+								"{{WLPK}}"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. WLPK (Wishlist PK): global variable you can get from \"Get User Wishlist\" API \n2. Token: global variable you can get from \"Customer Oauth\"\n3. Fields: DEFAULT or FULL\n4. Lang (Language): en OR ar"
+					},
+					"response": []
+				},
+				{
+					"name": "WishList By Code",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "09e5764e-4895-487c-a713-e751c91494c1",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"",
+									"pm.test(\"Body matches string\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"available\");",
+									"    pm.expect(pm.response.text()).to.include(\"true\");",
+									"    //pm.expect(pm.response.text()).to.include(\"false\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/wishlists/found/{{PCode}}?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"wishlists",
+								"found",
+								"{{PCode}}"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. PCode (Product code): global variable you can get from \"Get Product By Code\" API\n2. Token: global variable you can get from \"Customer Oauth\"\n3. Fields: DEFAULT or FULL\n4. Lang (Language): en OR ar"
+					},
+					"response": []
+				},
+				{
+					"name": "User Wishlist Entries",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9da647c5-2ca2-4dc5-a813-5f587d9f4efb",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/wishlists/{{WLPK}}/wishlist-entries?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"wishlists",
+								"{{WLPK}}",
+								"wishlist-entries"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. WLPK (Wishlist PK): global variable you can get from \"Get User Wishlist\" API\n2. Token: global variable you can get from \"Customer Oauth\"\n3. Fields: DEFAULT or FULL\n4. Lang (Language): en OR ar"
+					},
+					"response": []
+				},
+				{
+					"name": "Is In Wishlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b18b015a-d8a9-42a2-939f-786d1144f300",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n   \"productsInWishList\": [ \n     { \n       \"available\": true, \n       \"productCode\": \"{{PCode}}\" \n     } \n   ] \n }"
+						},
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/wishlists/found?productsInWishList={{ProductsInWishList}}&access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"wishlists",
+								"found"
+							],
+							"query": [
+								{
+									"key": "productsInWishList",
+									"value": "{{ProductsInWishList}}"
+								},
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. ProductsInWishList: true OR false\n2. Token: global variable you can get from \"Customer Oauth\"\n3. Fields: DEFAULT or FULL\n4. Lang (Language): en OR ar"
+					},
+					"response": []
+				},
+				{
+					"name": "Add To Cart All",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "d1bdd76a-8022-4b85-8f5e-52efa11fe001",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200,201]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n   \"entries\": [ \n      \n     { \n       \"code\": \"{{PCode}}\", \n       \"pickupStore\": \"{{StoreName}}\", \n       \"quantity\": 2\n     }\n   ] \n }"
+						},
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/entry/all?access_token={{Token}}&fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"carts",
+								"{{Cart}}",
+								"entry",
+								"all"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. Cart: you can get from \"Get Carts\" API\n2. Token: global variable you can get from \"Customer Oauth\"\n3. Fields: DEFAULT or FULL\n4. StoreName: you can get from \"Location Search\" API"
+					},
+					"response": []
+				},
+				{
+					"name": "All item In WishList",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e6372040-999a-41ed-8c75-be25a37e4b0e",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \n   \"productsInWishList\": [ \n     { \n       \"available\": true, \n       \"productCode\": \"11622BO\" \n     } \n   ] \n }"
+						},
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/wishlists/found?productsInWishList={{ProductsInWishList}}&access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"wishlists",
+								"found"
+							],
+							"query": [
+								{
+									"key": "productsInWishList",
+									"value": "{{ProductsInWishList}}"
+								},
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. ProductsInWishList: true OR false\n2. Token: global variable you can get from \"Customer Oauth\"\n3. Fields: DEFAULT or FULL\n4. Lang (Language): en OR ar"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Wishlist Entry",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "abb2eb47-195f-45e8-b979-0006dde804af",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200,202]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/wishlists/{{WLPK}}/wishlist-entries/{{PCode}}?access_token={{Token}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"wishlists",
+								"{{WLPK}}",
+								"wishlist-entries",
+								"{{PCode}}"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								}
+							]
+						},
+						"description": "1. WLPK (Wishlist PK): global variable set through \"Get User Wishlist\"\n2. PCode (Product code): global variable you can get from \"Get Product By Code\" API\n3. Token: global variable you can get from \"Customer Oauth\""
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Wishlist",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "65f5a3ec-d9d5-4d7e-9f44-a67354e02f9d",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([200,202]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/wishlists/{{WLPK}}?access_token={{Token}}&onlyEntries={{OnlyEntries}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"wishlists",
+								"{{WLPK}}"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "onlyEntries",
+									"value": "{{OnlyEntries}}"
+								}
+							]
+						},
+						"description": "1. WLPK (Wishlist PK): global variable set through \"Get User Wishlist\"\r\n2. PCode (Product code): global variable you can get from \"Get Product By Code\" API\r\n3. OnlyEntries: true OR false"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Checkout",
+			"item": [
+				{
+					"name": "Step 1",
+					"item": [
+						{
+							"name": "Get Addresses",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "6434bd21-199c-49bc-ad63-fa9b4a252ca3",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    ",
+											"     const response = pm.response.json();",
+											"     pm.globals.set(\"AddressPK\", response.addresses[1].id);",
+											"     ",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/addresses?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"addresses"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Token: global variable you can get from \"Customer Oauth\"\n2. Fields: DEFAULT or FULL\n3. Lang (Language): ar OR en\n\n\n1. This API set AddressPK as global variable"
+							},
+							"response": []
+						},
+						{
+							"name": "Set Cart Delivery Address",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "6e71fe0a-4b4b-45c0-81be-431734078bd9",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/addresses/delivery?addressId={{AddressPK}}&access_token={{Token}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"addresses",
+										"delivery"
+									],
+									"query": [
+										{
+											"key": "addressId",
+											"value": "{{AddressPK}}"
+										},
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										}
+									]
+								},
+								"description": "1. Cart: global variable ser through \"Get Carts\" API\n2. AddressPK: is set through \"Get Addresses\" API\n3. Token: global variable you can get from \"Customer Oauth\""
+							},
+							"response": []
+						},
+						{
+							"name": "Remove Cart Delivery Address",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "97118062-0ac4-4599-ae81-0364cb237cd3",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([202,200]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/addresses/delivery?access_token={{Token}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"addresses",
+										"delivery"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										}
+									]
+								},
+								"description": "1. Cart: global variable set \"Get Carts\" API\r\n2. Token: global variable set \"Customer Oauth\" API"
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Countries",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "e1e5588d-1ba4-4f37-9840-1ea67c7d1c31",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Set wishlist PK\", function () {",
+											"    ",
+											"    const response = pm.response.json();",
+											"    ",
+											"    pm.globals.set(\"isdCode\", response.countries[192].isdCode);",
+											"    pm.globals.set(\"isoCode\", response.countries[192].isocode);",
+											"    pm.globals.set(\"CountryName\", response.countries[192].name);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/mobile-countries/register?fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"mobile-countries",
+										"register"
+									],
+									"query": [
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Fields: DEFAULT or FULL\n2. Lang (Language): ar OR en\n\n\n1. This API set \"isdCode\" as global variable\n2. This API set \"isoCode\" as global variable\n3. This API set \"CountryName\" as global variable"
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Delivery Countries",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "05d71119-b95b-439d-a970-27c64a895167",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"",
+											"pm.test(\"Set wishlist PK\", function () {",
+											"    ",
+											"    const response = pm.response.json();",
+											"    ",
+											"    pm.globals.set(\"isdCode\", response.countries[0].isdCode);",
+											"    pm.globals.set(\"isoCode\", response.countries[0].isocode);",
+											"    pm.globals.set(\"CountryName\", response.countries[0].name);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/deliverycountries?fields={{Fields}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"deliverycountries"
+									],
+									"query": [
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										}
+									]
+								},
+								"description": "1. Fields: DEFAULT or FULL\n\n\n1. This API set \"isdCode\" as global variable\n2. This API set \"isoCode\" as global variable\n3. This API set \"CountryName\" as global variable"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Country City List",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "6316dc99-6160-406a-9b53-b72d41e53e80",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"",
+											"pm.test(\"Set wishlist PK\", function () {",
+											"    ",
+											"    const response = pm.response.json();",
+											"    ",
+											"    pm.globals.set(\"CityIsoCode\", response.cities[1].isocode);",
+											"    pm.globals.set(\"CityName\", response.cities[1].name);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/country-city-list?coutryCode={{MCC}}&fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"country-city-list"
+									],
+									"query": [
+										{
+											"key": "coutryCode",
+											"value": "{{MCC}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. MCC (Mobile country code): global variable set through \"Get All Countries (Register Mobile Countries)\" API\n2. Fields: DEFAULT or FULL\n3. Lang (Language): ar OR en\n\n\n\n1. This API set \"CityIsoCode\" as global variable\n2. This API set \"CityName\" as global variable"
+							},
+							"response": []
+						},
+						{
+							"name": "Create And Set Address",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "e623e10f-540d-450c-bd31-d96696e7c946",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    ",
+											"     const response = pm.response.json();",
+											"     pm.globals.set(\"AddressPK\", response.id);",
+											"     ",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{  \n    \"addressNote\": \"this is any adress note\",  \n    \"area\": \"this is any address are\",  \n    \"billingAddress\": true,  \n    \"cellPhone\": \"8796978839575\",  \n    \"companyName\": \"Erabia\",  \n    \"country\": {  \n      \"isdCode\": \"{{isdCode}}\",  \n      \"isocode\": \"{{isoCode}}\",  \n      \"mobileExample\": \"0501234567\",   \n      \"name\": \"{{CountryName}}\",  \n      \"priority\": 0  \n    },  \n    \"defaultAddress\": true,  \n    \"editable\": true,  \n    \"email\": \"{{UserID}}\",  \n    \"firstName\": \"{{FName}}\",  \n    \"formattedAddress\": \"string\",  \n    \"lastName\": \"{{LName}}\",  \n    \"latitude\": 12.136145646,  \n    \"line1\": \"12.136145646\",  \n    \"line2\": \"13.136145646\",  \n    \"longitude\": 13.136145646,  \n    \"mobileNumber\": \"078839575\",  \n    \"mobilePhone\": {  \n    \"country\": {  \n      \"isdCode\": \"{{isdCode}}\",  \n      \"isocode\": \"{{isoCode}}\",   \n      \"mobileExample\": \"05012345679\",  \n      \"name\": \"{{CountryName}}\",  \n      \"priority\": 0  \n    },  \n      \"number\": \"00962790805249\"  \n    },  \n    \"phone\": \"00962790805249\",  \n    \"pin\": {  \n      \"cc\": true,  \n      \"city\": \"{{CityName}}\",  \n      \"cod\": true,  \n      \"code\": \"{{CityIsoCode}}\",  \n      \"state\": \"state\"  \n    },  \n    \"postalCode\": \"0000\",  \n    \"shippingAddress\": true,  \n    \"title\": \"{{Title}}\",  \n    \"titleCode\": \"{{Title}}\",  \n    \"town\": \"string\",  \n    \"visibleInAddressBook\": true  \n  }"
+								},
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/addresses/delivery?fields={{Fields}}&access_token={{Token}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"addresses",
+										"delivery"
+									],
+									"query": [
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										}
+									]
+								},
+								"description": "1. Cart: global variable set \"Get Carts\" API\n2. Fields: DEFAULT or FULL\n3. Token: global variable set \"Customer Oauth\" API\n\n\n1. This API set AddressPK as global variable"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Cart Delivery Mode",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "66b2df19-62f5-4690-bd80-817ce0c0b0c8",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/deliverymode?access_token={{Token}}&fields={{Fields}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"deliverymode"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										}
+									]
+								},
+								"description": "1. You should call \"Set Cart Delivery mode\" then run this\n\n1. Cart: global variable ser through \"Get Carts\" API\n2. Token: global variable you can get from \"Customer Oauth\"\n3. Fields: DEFAULT or FULL"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Supported Delivery Mode",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "06d9dfe7-60ee-4edc-98f6-bea0dbc424f5",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    ",
+											"     const response = pm.response.json();",
+											"     pm.globals.set(\"DMID\", response.code);",
+											"     ",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/deliverymode?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"deliverymode"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Cart: global variable ser through \"Get Carts\" API\r\n2. Token: global variable you can get from \"Customer Oauth\"\r\n3. Fields: DEFAULT or FULL\r\n4. Lang (Language): ar OR en\r\n\r\n\r\n\r\n1. This API set \"DMID\" (Delivery Mode ID) as global variable"
+							},
+							"response": []
+						},
+						{
+							"name": "Set Cart Delivery mode",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "7cd84412-ab0c-4977-adbd-03d6df2cfeae",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/deliverymode?deliveryModeId={{DMID}}&access_token={{Token}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"deliverymode"
+									],
+									"query": [
+										{
+											"key": "deliveryModeId",
+											"value": "{{DMID}}"
+										},
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										}
+									]
+								},
+								"description": "1. Cart: global variable ser through \"Get Carts\" API\r\n2. DMID (Delivery mode ID): is set through \"Get Supported Delivery Mode\" API\r\n3. Token: global variable you can get from \"Customer Oauth\""
+							},
+							"response": []
+						},
+						{
+							"name": "Remove Delivery Mode",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "1d4516f2-905d-4880-8eaf-3c5bd3d3bfc8",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([202,200]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/deliverymode?access_token={{Token}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"deliverymode"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										}
+									]
+								},
+								"description": "1. Cart: global variable ser through \"Get Carts\" API\n2. Token: global variable you can get from \"Customer Oauth\""
+							},
+							"response": []
+						},
+						{
+							"name": "Get Cart Time Slot",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "dcc27ee3-a1d4-447f-b2ca-7ca239bb970b",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Set wishlist PK\", function () {",
+											"    ",
+											"    const response = pm.response.json();",
+											"    ",
+											"    pm.globals.set(\"TSDate\", response.timeSlotResults[5].date);",
+											"    pm.globals.set(\"TSTime\", response.timeSlotResults[5].timeSlotData[4].time);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/time-slot?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"time-slot"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Cart: you can get from \"Get Carts\" API\n2. Token: global variable you can get from \"Customer Oauth\"\n3. Fields: DEFAULT or FULL\n4. Lang (Language): ar OR en\n\n\n1. This API set \"TSDate\" as global variable\n2. This API set \"TSTime\" as global variable"
+							},
+							"response": []
+						},
+						{
+							"name": "Set Time Slot For Cart",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "f754dadc-c3d7-45a0-9538-d636b43486ce",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/time-slot?selectedTimeSlotDate={{TSDate}}&selectedTimeSlotTime={{TSTime}}&access_token={{Token}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"time-slot"
+									],
+									"query": [
+										{
+											"key": "selectedTimeSlotDate",
+											"value": "{{TSDate}}"
+										},
+										{
+											"key": "selectedTimeSlotTime",
+											"value": "{{TSTime}}"
+										},
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										}
+									]
+								},
+								"description": "1. Cart: you can get from \"Get Carts\" API\r\n2. TSDate (Time slot date): global variable you can get from \"Get Cart Time Slot\" API\r\n3. TSTime (Time slot time): global variable you can get from \"Get Cart Time Slot\" API\r\n4. Token: global variable you can get from \"Customer Oauth\""
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Step 2",
+					"item": [
+						{
+							"name": "Get Available Gift Cards",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "a97e95b8-436e-4710-ab1b-3c76492a27f7",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    ",
+											"    const response = pm.response.json();",
+											"    pm.globals.set(\"GCard\", response.giftCards[0].number);",
+											"     ",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/gift-cards?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"gift-cards"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Cart: you can get from \"Get Carts\" API\r\n2. Token: global variable you can get from \"Customer Oauth\"\r\n3. Fields: DEFAULT or FULL\r\n4. Lang (Language): ar OR en\r\n\r\n\r\n\r\n1. This API set \"GCard (Gift Card)\" as global variable"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Supported Gift Cards Modes",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "e5174d69-0a69-42e6-8838-65853a5b554d",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    ",
+											"    const response = pm.response.json();",
+											"    pm.globals.set(\"GCMode\", response.giftCardModes[1].giftCardModeType.code);",
+											"     ",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/gift-cards/modes?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"gift-cards",
+										"modes"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Cart: you can get from \"Get Carts\" API\r\n2. Token: global variable you can get from \"Customer Oauth\"\r\n3. Fields: DEFAULT or FULL\r\n4. Lang (Language): ar OR en\r\n\r\n\r\n\r\n1. This API set \"GCMode (Gift card mode)\" as global variable"
+							},
+							"response": []
+						},
+						{
+							"name": "Set Gift Card Mode",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "eeca5258-d2e5-4ee0-a079-c7a42e584ece",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \n   \"giftCards\": [ \n     { \n       \"amount\": { \n         \"maxQuantity\": 0, \n         \"minQuantity\": 0, \n           \"currencyIso\": \"AED\", \n           \"formattedValue\": \"100.00 AED\", \n           \"priceType\": \"BUY\", \n           \"value\": 100 \n       }, \n         \"date\": \"2019-09-26T08:10:01+0000\", \n         \"displayNumber\": \"****5678\", \n         \"number\": \"12345678\", \n         \"pin\": \"123\", \n         \"used\": false \n     } \n   ] \n } \n "
+								},
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/gift-card?access_token={{Token}}&giftCardModeTypeCode={{GCMode}}&giftCardTypeAmaountSelected={{GCAmount}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"gift-card"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "giftCardModeTypeCode",
+											"value": "{{GCMode}}"
+										},
+										{
+											"key": "giftCardTypeAmaountSelected",
+											"value": "{{GCAmount}}"
+										}
+									]
+								},
+								"description": "1. Cart: you can get from \"Get Carts\" API\r\n2. Token: global variable you can get from \"Customer Oauth\"\r\n3. GCMode (Gift card mode): global variable you can get from \"Get Supported Gift Cards Modes\""
+							},
+							"response": []
+						},
+						{
+							"name": "Get Supported Store Credit Modes",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "cc8822d1-bca7-4797-a9f3-4ce247bd4bb2",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    ",
+											"    const response = pm.response.json();",
+											"    pm.globals.set(\"SCCode\", response.storeCreditModes[0].storeCreditModeType.code);",
+											"",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/store-credit/modes?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"store-credit",
+										"modes"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Cart: you can get from \"Get Carts\" API\r\n2. Token: global variable you can get from \"Customer Oauth\"\r\n3. Fields: DEFAULT or FULL\r\n4. Lang (Language): ar OR en\r\n\r\n\r\n1. This API set \"SCCode (Store credit code)\" as global variable"
+							},
+							"response": []
+						},
+						{
+							"name": "Set Store Credit Mode",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "09392273-d682-40fc-afd4-e88a0c56a3dd",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/store-credit?access_token={{Token}}&storeCreditTypeCode={{SCCode}}&storeCreditAmountSelected={{SCAmount}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"store-credit"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "storeCreditTypeCode",
+											"value": "{{SCCode}}"
+										},
+										{
+											"key": "storeCreditAmountSelected",
+											"value": "{{SCAmount}}"
+										}
+									]
+								},
+								"description": "1. Cart: you can get from \"Get Carts\" API\r\n2. Token: global variable you can get from \"Customer Oauth\"\r\n3. SCCode (Store credit code): global variable you can get from \"Get Supported Gift Cards Modes\""
+							},
+							"response": []
+						},
+						{
+							"name": "Get Supported Payment Modes",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "bac40030-b3ca-460c-857e-509c78f81d9e",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    ",
+											"    const response = pm.response.json();",
+											"    pm.globals.set(\"PaymentModeCode\", response.paymentModes[0].code);",
+											"     ",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/paymentmodes?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"paymentmodes"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Cart: you can get from \"Get Carts\" API\r\n2. Token: global variable you can get from \"Customer Oauth\"\r\n3. Fields: DEFAULT or FULL\r\n4. Lang (Language): ar OR en\r\n\r\n\r\n1. This API set \"PaymentModeCode\" as global variable"
+							},
+							"response": []
+						},
+						{
+							"name": "Set Payment Mode (By Code)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "31aa1bb5-b9b9-485c-88f9-a65632dd2ce8",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/paymentmodes?access_token={{Token}}&fields={{Fields}}&paymentModeCode={{PaymentModeCode}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"paymentmodes"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "paymentModeCode",
+											"value": "{{PaymentModeCode}}"
+										}
+									]
+								},
+								"description": "1. Cart: you can get from \"Get Carts\" API\r\n2. Token: global variable you can get from \"Customer Oauth\"\r\n3. Fields: DEFAULT or FULL\r\n4. PaymentModeCode: global variable you can get from \"Get Supported Payment Modes\""
+							},
+							"response": []
+						},
+						{
+							"name": "Add Payment Details",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "d9f84f31-07d2-424d-a7bc-5bdfc7cb82b1",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,202]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \n   \"accountHolderName\": \"{{FName}}\", \n   \"billingAddress\": { \n     \"addressNote\": \"this is address note\", \n     \"area\": \"area\", \n     \"billingAddress\": true, \n     \"cellPhone\": \"{{Mob}}\", \n     \"companyName\": \"erabia\", \n   \"country\": { \n     \"isdCode\": \"{{isdCode}}\", \n     \"isocode\": \"{{isoCode}}\", \n     \"mobileExample\": \"{{Mob}}\", \n     \"name\": \"{{isoCode}}\", \n     \"priority\": 0 \n   }, \n     \"defaultAddress\": true, \n     \"editable\": true, \n     \"email\": \"{{UserID}}\", \n     \"firstName\": \"{{FName}}\", \n     \"lastName\": \"{{LName}}\", \n     \"latitude\": 12.165461321, \n     \"line1\": \"line1\", \n     \"line2\": \"line2\", \n     \"longitude\": 14.165461321, \n     \"mobileNumber\": \"{{Mob}}\", \n     \"mobilePhone\": { \n       \"country\": { \n     \"isdCode\": \"{{isdCode}}\", \n     \"isocode\": \"{{isoCode}}\",  \n     \"mobileExample\": \"{{Mob}}\", \n     \"name\": \"{{isoCode}}\", \n     \"priority\": 0 \n       }, \n       \"number\": \"{{Mob}}\" \n     }, \n     \"phone\": \"{{Mob}}\", \n     \"pin\": { \n       \"cc\": true, \n       \"city\": \"{{CityName}}\", \n       \"cod\": true, \n       \"code\": \"{{CityIsoCode}}\", \n       \"state\": \"state\" \n     }, \n     \"postalCode\": \"0000\", \n     \"region\": { \n       \"countryIso\": \"{{isoCode}}\", \n       \"isocode\": \"{{isoCode}}\", \n       \"isocodeShort\": \"string\", \n       \"name\": \"{{CountryName}}\" \n     }, \n     \"shippingAddress\": true, \n     \"title\": \"{{TitleName}}\", \n     \"titleCode\": \"{{Title}}\", \n     \"town\": \"{{CityName}}\", \n     \"townCity\": { \n       \"isocode\": \"{{CityIsoCode}}\", \n       \"name\": \"{{CityName}}\" \n     }, \n     \"visibleInAddressBook\": true \n   }, \n   \"cardNumber\": \"{{CardNumber}}\", \n   \"cardType\": { \n     \"code\": \"{{CardName}}\", \n     \"name\": \"{{CardName}}\"  \n   }, \n   \"defaultPayment\": true, \n     \"expiryMonth\": \"{{CardExpiryMonth}}\",  \n   \"expiryYear\": \"{{CardExpiryYear}}\" \n }"
+								},
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/carts/{{Cart}}/paymentdetails?fields={{Fields}}&access_token={{Token}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"carts",
+										"{{Cart}}",
+										"paymentdetails"
+									],
+									"query": [
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										}
+									]
+								},
+								"description": "1. Cart: you can get from \"Get Carts\" API\n2. Fields: DEFAULT or FULL\n3. Token: global variable you can get from \"Customer Oauth\"\n--------------------------------------------------------------------------\nBody\n1. Mob (Mobile): global variable set through \"Get All Countries (Register Mobile Countries)\" API\n2. isdCode: global variable set through \"Get All Countries (Register Mobile Countries)\" API\n3. isoCode: global variable set through \"Get All Countries (Register Mobile Countries)\" API\n4. CountryName: global variable set through \"Get All Countries (Register Mobile Countries)\" API\n5. FName (First Name)\n6. LName (Last Name)\n7. CityName: global variable set through \"Get Country City List\" API\n8. CityIsoCode: global variable set through \"Get Country City List\" API\n9. CountryName: global variable set through \"Get All Delivery Countries\" API\n10. TitleName: global variable set through \"Get Titles\" AP\n11. Title: global variable set through \"Get Titles\" API\n12. CardNumber\n13. CardName is used for code and name, and it will fail if changed\n14. CardExpiryMonth\n15. CardExpiryYear"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Step 3",
+					"item": [
+						{
+							"name": "Place Order",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "a242149b-7fba-4f3d-8262-0b4f4d4d8adb",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    const response = pm.response.json();",
+											"    pm.globals.set(\"OrderNo\", response.code);",
+											"    ",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/orders?cartId={{Cart}}&fields={{Fields}}&access_token={{Token}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"orders"
+									],
+									"query": [
+										{
+											"key": "cartId",
+											"value": "{{Cart}}"
+										},
+										{
+											"key": "securityCode",
+											"value": "{{SecurityCode}}",
+											"disabled": true
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										}
+									]
+								},
+								"description": "1. Cart: you can get from \"Get Carts\" API\r\n2. Token: global variable you can get from \"Customer Oauth\"\r\n3. Fields: DEFAULT or FULL\r\n\r\n\r\n1. This API set \"OrderNo\" as global variable"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				}
+			]
+		},
+		{
+			"name": "Static Pages",
+			"item": [
+				{
+					"name": "Location Search",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "1d94b26a-51c3-4941-8d64-2120a9d1997c",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Set store name\", function(){",
+									"    // KAF line",
+									"   pm.environment.set(\"StoreName\", response.stores[1].name); ",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/stores?currentPage={{CPage}}&pageSize={{PSize}}&sort={{Sort}}&fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"stores"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "{{Query}}",
+									"disabled": true
+								},
+								{
+									"key": "latitude",
+									"value": "{{Latitude}}",
+									"disabled": true
+								},
+								{
+									"key": "longitude",
+									"value": "{{Longitude}}",
+									"disabled": true
+								},
+								{
+									"key": "currentPage",
+									"value": "{{CPage}}"
+								},
+								{
+									"key": "pageSize",
+									"value": "{{PSize}}"
+								},
+								{
+									"key": "sort",
+									"value": "{{Sort}}"
+								},
+								{
+									"key": "radius",
+									"value": "{{Radius}}",
+									"disabled": true
+								},
+								{
+									"key": "accuracy",
+									"value": "{{Accuracy}}",
+									"disabled": true
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. CPage: Current Page\n2. PSize: Page size\n3. Fields: DEFAULT or FULL\n4. Lang (Language): ar OR en\n\n\n1. This API set StoreName as environmental variable"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "My Account",
+			"item": [
+				{
+					"name": "User Profile",
+					"item": [
+						{
+							"name": "Get User",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "b7181046-4875-4f06-8f1a-2fe4af8dbc6d",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Token: global variable you can get from \"Customer Oauth\"\r\n2. Fields: DEFAULT or FULL\r\n3. Lang (Language): en OR ar"
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Nationality",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "e8fe7493-4372-4bcc-bd53-761073db09d4",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/nationality?fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"nationality"
+									],
+									"query": [
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Fields: DEFAULT or FULL\n2. Lang (Language): en OR ar"
+							},
+							"response": []
+						},
+						{
+							"name": "Update User",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "06fddc42-7e47-49e3-95d9-5ccaea7e8e05",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}?firstName={{FName}}&lastName={{LName}}&titleCode={{Title}}&dateOfBirth={{DOB}}&mobileCountryCode={{MCC}}&mobileNumber={{Mob}}&access_token={{Token}}&genderCode={{Gender}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}"
+									],
+									"query": [
+										{
+											"key": "firstName",
+											"value": "{{FName}}"
+										},
+										{
+											"key": "lastName",
+											"value": "{{LName}}"
+										},
+										{
+											"key": "titleCode",
+											"value": "{{Title}}"
+										},
+										{
+											"key": "dateOfBirth",
+											"value": "{{DOB}}"
+										},
+										{
+											"key": "accountType",
+											"value": "{{AccType}}",
+											"disabled": true
+										},
+										{
+											"key": "mobileCountryCode",
+											"value": "{{MCC}}"
+										},
+										{
+											"key": "mobileNumber",
+											"value": "{{Mob}}"
+										},
+										{
+											"key": "nationalityCode",
+											"value": "{{Nationality}}",
+											"disabled": true
+										},
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "genderCode",
+											"value": "{{Gender}}"
+										}
+									]
+								},
+								"description": "1. FName (First name)\n2. LName (Last name)\n3. Title: you can get from \"Get Titles\" API\n4. DOB (Date of Birth)\n5. MCC (Mobile country code): you can get from \"Get All Countries (Register Mobile Countries)\" API\n6. Mob (Mobile)\n7. Token: you can get from \"Customer Oauth\" API\n8. Gender: you can get from \"Get All Gender\" API"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Email Address",
+					"item": [
+						{
+							"name": "Update Email",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "e43078d1-7b13-4df1-9490-d99017126a89",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/login?access_token={{Token}}&newLogin={{NewUserID}}&password={{Password}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"login"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "newLogin",
+											"value": "{{NewUserID}}"
+										},
+										{
+											"key": "password",
+											"value": "{{Password}}"
+										}
+									]
+								},
+								"description": "1. Token: you can get from \"Customer Oauth\" API"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Password",
+					"item": [
+						{
+							"name": "Change Password",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "dd4abc70-0cb4-415b-b974-26732deb6091",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,200,202]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/password?access_token={{Token}}&old={{Password}}&new={{NewPassword}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"password"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "old",
+											"value": "{{Password}}"
+										},
+										{
+											"key": "new",
+											"value": "{{NewPassword}}"
+										}
+									]
+								},
+								"description": "1. Token: you can get from \"Customer Oauth\" API"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Order History",
+					"item": [
+						{
+							"name": "Get Orders For User",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "8c599f16-c11e-4e98-89f3-24ff89a4f13d",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/orders?currentPage={{CPage}}&pageSize={{PSize}}&fields={{Fields}}&access_token={{Token}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"orders"
+									],
+									"query": [
+										{
+											"key": "statuses",
+											"value": "{{Statuses}}",
+											"disabled": true
+										},
+										{
+											"key": "currentPage",
+											"value": "{{CPage}}"
+										},
+										{
+											"key": "pageSize",
+											"value": "{{PSize}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. CPage (Current page)\r\n2. PSize (Page size)\r\n3. Token: you can get from \"Customer Oauth\" API\r\n4. Lang (Language): en OR ar\r\n\r\n--------------------------------------------------------------\r\n\r\n\r\n\r\nThese are the valid statuses:\r\n\r\nCANCELLING,\r\nCHECKED_VALID,\r\nCREATED,\r\nOPEN,\r\nREADY,\r\nCHECKED_INVALID,\r\nON_HOLD,\r\nON_VALIDATION,\r\nPENDING_APPROVAL,\r\nSUSPENDED,\r\nCOMPLETED,\r\nPAYMENT_AUTHORIZED,\r\nPENDING_APPROVAL_FROM_MERCHANT,\r\nCANCELLED,\r\nPAYMENT_NOT_AUTHORIZED,\r\nPENDING_QUOTE,\r\nAPPROVED_QUOTE,\r\nPAYMENT_AMOUNT_RESERVED,\r\nPAYMENT_AMOUNT_NOT_RESERVED,\r\nREJECTED_QUOTE,\r\nAPPROVED,\r\nPAYMENT_CAPTURED,\r\nPAYMENT_NOT_CAPTURED,\r\nREJECTED,\r\nAPPROVED_BY_MERCHANT,\r\nFRAUD_CHECKED,\r\nORDER_SPLIT,\r\nREJECTED_BY_MERCHANT,\r\nASSIGNED_TO_ADMIN,\r\nPROCESSING_ERROR,\r\nB2B_PROCESSING_ERROR,\r\nWAIT_FRAUD_MANUAL_CHECK"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Order For User By Code",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "680feddc-2c85-45dd-8ef3-70a3d2214e15",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/orders/{{OrderNo}}?fields={{Fields}}&access_token={{Token}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"orders",
+										"{{OrderNo}}"
+									],
+									"query": [
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. OrderNo: you can get from \"Place Order\" API\n2. Fields: DEFAULT or FULL\n3. Token: you can get from \"Customer Oauth\" API\n4. Lang (Language):  en OR  ar"
+							},
+							"response": []
+						},
+						{
+							"name": "Reorder",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "27e6e69a-faad-4d2b-9712-75c1a99d47e7",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Successful POST request\", function () {",
+											"    const response = pm.response.json();",
+											"        pm.globals.set(\"Cart\", response.code);",
+											"        pm.globals.set(\"Guid\", response.guid);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/reorder/{{OrderNo}}?fields={{Fields}}&access_token={{Token}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"reorder",
+										"{{OrderNo}}"
+									],
+									"query": [
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. OrderNo: you can get from \"Place Order\" API\r\n2. Fields: DEFAULT or FULL\r\n3. Token: you can get from \"Customer Oauth\" API\r\n4. Lang (Language): en OR ar\r\n\r\n\r\n1. This API set the \"Cart\" as global variable\r\n2. This API set the \"Guid\" as global variable"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Addresses",
+					"item": [
+						{
+							"name": "Get Addresses",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "f39b8aaa-6d56-4d70-9f86-156efd96a5a5",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    ",
+											"     const response = pm.response.json();",
+											"     pm.globals.set(\"AddressPK\", response.addresses[0].id);",
+											"     ",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/addresses?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"addresses"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Fields: DEFAULT or FULL\r\n2. Token: you can get from \"Customer Oauth\" API\r\n3. Lang (Language): en OR ar"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Address",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "36675c54-a3e2-431d-9e7d-eac2cd3f150f",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/addresses/{{AddressPK}}?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"addresses",
+										"{{AddressPK}}"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Fields: DEFAULT or FULL\r\n2. Token: you can get from \"Customer Oauth\" API\r\n3. Lang (Language): en OR ar\r\n4. AddressPK: you can get from \"Get Addresses\" API"
+							},
+							"response": []
+						},
+						{
+							"name": "Create Address",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "46c96da7-fc7d-444b-939b-6e9e418d8c38",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,202]);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    ",
+											"    const response = pm.response.json();",
+											"    pm.globals.set(\"AddressPK\", response.id);",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \n   \"addressNote\": \"addressNote\", \n   \"area\": \"area\", \n   \"billingAddress\": true, \n   \"cellPhone\": \"{{Mob}}\", \n   \"companyName\": \"erabia\", \n   \"country\": { \n     \"isdCode\": \"{{isdCode}}\", \n     \"isocode\": \"{{isoCode}}\",  \n     \"mobileExample\": \"0506541236\", \n     \"name\": \"{{CountryName}}\", \n     \"priority\": 0 \n   }, \n   \"defaultAddress\": true, \n   \"editable\": true, \n   \"email\": \"{{UserID}}\", \n   \"firstName\": \"{{FName}}\", \n   \"formattedAddress\": \"103 Rd - Dubai - United Arab Emirates, 103 Rd - Dubai - United Arab Emirates, Dubai, 0000\", \n   \"id\": \"87964862709992\", \n   \"lastName\": \"{{LName}}\", \n   \"latitude\": 25.276987, \n   \"line1\": \"string\", \n   \"line2\": \"string\", \n   \"longitude\": 55.29624899999999, \n   \"mobileNumber\": \"{{Mob}}\",  \n   \"mobilePhone\": { \n     \"country\": { \n       \"isdCode\": \"{{isdCode}}\", \n       \"isocode\": \"{{isoCode}}\", \n       \"mobileExample\": \"{{Mob}}\", \n       \"name\": \"{{CountryName}}\", \n       \"priority\": 0 \n     }, \n     \"number\": \"{{Mob}}\" \n   }, \n   \"phone\": \"{{Mob}}\", \n   \"pin\": { \n     \"cc\": true, \n     \"city\": \"{{CityName}}\", \n     \"cod\": true, \n     \"code\": \"{{CityIsoCode}}\", \n     \"state\": \"state\" \n   }, \n   \"postalCode\": \"0000\", \n   \"shippingAddress\": true, \n   \"title\": \"{{TitleValue}}\", \n   \"titleCode\": \"{{Title}}\", \n   \"town\": \"{{CityName}}\", \n   \"townCity\": { \n     \"isocode\": \"{{CityIsoCode}}\", \n     \"name\": \"{{CityName}}\" \n   }, \n   \"visibleInAddressBook\": true \n }"
+								},
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/addresses?access_token={{Token}}&fields={{Fields}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"addresses"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										}
+									]
+								},
+								"description": "1. Fields: DEFAULT or FULL\n2. Token: you can get from \"Customer Oauth\" API\n---------------------------------------------------------\n\nBody:\n1. Mob (Mobile): global variable set through \"Get All Countries (Register Mobile Countries)\" API\n2. isdCode: global variable set through \"Get All Countries (Register Mobile Countries)\" API\n3. isoCode: global variable set through \"Get All Countries (Register Mobile Countries)\" API\n4. CountryName: global variable set through \"Get All Countries (Register Mobile Countries)\" API\n5. FName (First Name)\n6. LName (Last Name)\n7. CountryName: global variable set through \"Get All Delivery Countries\" API\n8. CityName: global variable set through \"Get Country City List\" API\n9. CityIsoCode: global variable set through \"Get Country City List\" API\n10. TitleValue: global variable set through \"Get Titles\" API\n11. Title: global variable set through \"Get Titles\" API"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Address",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "32f4a9fd-7526-4d12-bed6-4203724bbfa8",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											" pm.response.to.have.status(200);});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n   \"addressNote\": \"addressNote\", \r\n   \"area\": \"area\", \r\n   \"billingAddress\": true, \r\n   \"cellPhone\": \"{{Mob}}\", \r\n   \"companyName\": \"erabia\", \r\n   \"country\": { \r\n     \"isdCode\": \"{{isdCode}}\", \r\n     \"isocode\": \"{{isoCode}}\",  \r\n     \"mobileExample\": \"962799586527\", \r\n     \"name\": \"{{CountryName}}\", \r\n     \"priority\": 0 \r\n   }, \r\n   \"defaultAddress\": true, \r\n   \"editable\": true, \r\n   \"email\": \"{{UserID}}\", \r\n   \"firstName\": \"{{FName}}\", \r\n   \"formattedAddress\": \"103 Rd - Dubai - United Arab Emirates, 103 Rd - Dubai - United Arab Emirates, Dubai, 0000\", \r\n   \"id\": \"{{AddressPK}}\", \r\n   \"lastName\": \"string\", \r\n   \"latitude\": 25.276987, \r\n   \"line1\": \"string\", \r\n   \"line2\": \"string\",  \r\n   \"longitude\": 55.29624899999999, \r\n   \"mobileNumber\": \"0506666333\",  \r\n   \"mobilePhone\": { \r\n     \"country\": { \r\n       \"isdCode\": \"{{isdCode}}\", \r\n       \"isocode\": \"{{isoCode}}\",  \r\n       \"mobileExample\": \"0506666333\", \r\n       \"name\": \"{{CountryName}}\", \r\n       \"priority\": 0 \r\n     }, \r\n     \"number\": \"{{Mob}}\" \r\n   }, \r\n   \"phone\": \"{{Mob}}\", \r\n   \"pin\": { \r\n     \"cc\": true, \r\n     \"city\": \"{{CityName}}\", \r\n     \"cod\": true, \r\n     \"code\": \"{{CityIsoCode}}\", \r\n     \"state\": \"state\" \r\n   }, \r\n   \"postalCode\": \"0000\", \r\n   \"shippingAddress\": true, \r\n   \"title\": \"{{TitleValue}}\", \r\n   \"titleCode\": \"{{Title}}\", \r\n   \"town\": \"{{CityName}}\", \r\n   \"townCity\": { \r\n     \"isocode\": \"{{CityIsoCode}}\", \r\n     \"name\": \"{{CityName}}\" \r\n   }, \r\n   \"visibleInAddressBook\": true \r\n }\r\n"
+								},
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/addresses/{{AddressPK}}?access_token={{Token}}&fields={{Fields}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"addresses",
+										"{{AddressPK}}"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										}
+									]
+								},
+								"description": "1. Fields: DEFAULT or FULL\n2. Token: you can get from \"Customer Oauth\" API\n3. AddressPK: you can get from \"Get Addresses\" API\n---------------------------------------------------------\n\nBody:\n1. Mob (Mobile): global variable set through \"Get All Countries (Register Mobile Countries)\" API\n2. isdCode: global variable set through \"Get All Countries (Register Mobile Countries)\" API\n3. isoCode: global variable set through \"Get All Countries (Register Mobile Countries)\" API\n4. CountryName: global variable set through \"Get All Countries (Register Mobile Countries)\" API\n5. FName (First Name)\n6. LName (Last Name)\n7. CountryName: global variable set through \"Get All Delivery Countries\" API\n8. CityName: global variable set through \"Get Country City List\" API\n9. CityIsoCode: global variable set through \"Get Country City List\" API\n10. TitleValue: global variable set through \"Get Titles\" API\n11. Title: global variable set through \"Get Titles\" API"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Address",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "0f5afae8-94bd-4854-a968-1a3beb6c2dbd",
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											" pm.response.to.have.status(200);});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "*/*"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/addresses/{{AddressPK}}?access_token={{Token}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"addresses",
+										"{{AddressPK}}"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										}
+									]
+								},
+								"description": "1. Token: you can get from \"Customer Oauth\" API\r\n2. AddressPK: you can get from \"Get Addresses\" API"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Gift Card",
+					"item": [
+						{
+							"name": "Get Gift Card",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "6ace1122-5239-48dc-b83e-ded3a3da256f",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"pm.test(\"Body matches string\", function () {",
+											"    ",
+											"    const response = pm.response.json();",
+											"    pm.globals.set(\"GCard\", response.giftCards[0].number);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/giftcard?access_token={{Token}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"giftcard"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Token: you can get from \"Customer Oauth\" API\n2. Lang (Language): ar OR en\n\n\n1. This API set \"GCard (Gift Card)\" as global variable"
+							},
+							"response": []
+						},
+						{
+							"name": "Add Gift Card",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "f4346c4d-d1d6-440c-add5-0a4504c665d0",
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([201,200]);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/giftcard?cardNumber={{GCard}}&access_token={{Token}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"giftcard"
+									],
+									"query": [
+										{
+											"key": "cardNumber",
+											"value": "{{GCard}}"
+										},
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										}
+									]
+								},
+								"description": "1. Token: you can get from \"Customer Oauth\" API\n2. GCard (Gift Card): set through \"Get Gift Card\" API"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "Store Credit",
+					"item": [
+						{
+							"name": "Get Store Amount",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "15ba50f7-956e-4c45-8bac-7c58eb7ed1b3",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"",
+											"//pm.test(\"Body matches string\", function () {",
+											"    ",
+											"    //const response = pm.response.json();",
+											"   // pm.globals.set(\"GCard\", response.giftCards[0].number);",
+											"//});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/store-credit/available-amount?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"store-credit",
+										"available-amount"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Token: you can get from \"Customer Oauth\" API\r\n2. Fields: DEFAULT or FULL\r\n3. Lang (Language): ar OR en"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Store Credit History",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"id": "148985bc-e357-46d0-862c-35177c58bc49",
+										"exec": [
+											"pm.test(\"Validate status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/store-credit/store-credit-history?access_token={{Token}}&fields={{Fields}}&lang={{Lang}}",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"rest",
+										"v2",
+										"{{BaseSite}}",
+										"users",
+										"{{UserID}}",
+										"store-credit",
+										"store-credit-history"
+									],
+									"query": [
+										{
+											"key": "access_token",
+											"value": "{{Token}}"
+										},
+										{
+											"key": "fields",
+											"value": "{{Fields}}"
+										},
+										{
+											"key": "lang",
+											"value": "{{Lang}}"
+										}
+									]
+								},
+								"description": "1. Token: you can get from \"Customer Oauth\" API\r\n2. Fields: DEFAULT or FULL\r\n3. Lang (Language): ar OR en"
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				}
+			]
+		},
+		{
+			"name": "Forget Password",
+			"item": [
+				{
+					"name": "Restore Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "146a692c-5107-4961-9ea4-6dc2a136801b",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201,200,202]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/forgottenpasswordtokens?userId={{UserID}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"forgottenpasswordtokens"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "{{UserID}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Social Media",
+			"item": [
+				{
+					"name": "Create Social Media Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "0166e604-2811-4af4-bd00-7560405229da",
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201,200,202]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/facebook-customer?email={{SMUser}}&name={{FName}}&id={{UID}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"facebook-customer"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "{{SMUser}}"
+								},
+								{
+									"key": "name",
+									"value": "{{FName}}"
+								},
+								{
+									"key": "id",
+									"value": "{{UID}}"
+								}
+							]
+						},
+						"description": "1. SMUser: Social media user\n2. FName: First Name\n3. UID: User ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Check Social Media Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "d8a5fc0a-182d-4ac3-868a-d57c176a3134",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/check-facebook-customer?uid={{SMUser}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"check-facebook-customer"
+							],
+							"query": [
+								{
+									"key": "uid",
+									"value": "{{SMUser}}"
+								}
+							]
+						},
+						"description": "SMUser: Social media user"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Oauth Token Controller",
+			"item": [
+				{
+					"name": "Customer Oauth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "d84fcbac-7cf6-4026-a44e-54a46f5592bb",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Validate if body have access token\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"access_token\");",
+									"});",
+									"",
+									"var jsonData = JSON.parse(responseBody);",
+									"const response = pm.response.json();",
+									"",
+									"pm.test(\"Body matches string\", function () {",
+									"    tests[\"Validate access_token is not empty or null\"]=( jsonData.access_token !==\"\" && jsonData.access_token !== null);",
+									"    pm.environment.set(\"Token\", response.access_token);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/oath/customer?clientID={{Client}}&clientSecret={{Secret}}&customerName={{UserID}}&customerPassword={{Password}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"oath",
+								"customer"
+							],
+							"query": [
+								{
+									"key": "clientID",
+									"value": "{{Client}}"
+								},
+								{
+									"key": "clientSecret",
+									"value": "{{Secret}}"
+								},
+								{
+									"key": "customerName",
+									"value": "{{UserID}}"
+								},
+								{
+									"key": "customerPassword",
+									"value": "{{Password}}"
+								}
+							]
+						},
+						"description": "User\r\n2. Client ID: customer_group\r\n3. Secret: secret\r\n\r\n--------------------------------------------------------------------\r\n\r\nCMS customer\r\n5. Client ID: cutomer_manager_group\r\n6. Secret: secret\r\n----------------------------------------\r\n7. User ID: cmslayoutadministrator\r\n8. Password: cmslayout123"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CMS Layout Controller",
+			"item": [
+				{
+					"name": "Get Component By Page ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "fce165c6-cee7-4d61-b7be-10ec76ef779e",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.response.to.have.status(200);",
+									"    pm.globals.set(\"ComponentID\", response[0].uid);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{CMSUser}}/cms/{{CMSCatalog}}/versions/{{CatalogVersion}}/pages/{{PageID}}?access_token={{Token}}&fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{CMSUser}}",
+								"cms",
+								"{{CMSCatalog}}",
+								"versions",
+								"{{CatalogVersion}}",
+								"pages",
+								"{{PageID}}"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. You have to change the permission from \"Customer Oauth\" API\r\n\r\n-----------------------------------------------------------\r\n\r\n1. CMSUser: cmslayoutadministrator\r\n2. CMSCatalog: ygiordanob2c-saContentCatalog\r\n3. CatalogVersion: Online\r\n3. PageID: homepage\r\n4. Token: you can get from \"Customer Oauth\" API\r\n5. Fields: DEFAULT or FULL\r\n\r\n--------------------------------------------------------------\r\n\r\n1. This API set \"ComponentID\" as global value"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Component By Component ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "fae05b47-c790-4bfe-ad48-9ef34736d0e2",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    const response = pm.response.json();",
+									"    pm.response.to.have.status(200);",
+									"    pm.globals.set(\"ComponentType\", response[0].typeCode);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/cms/{{CMSCatalog}}/versions/{{CatalogVersion}}/pages/{{PageID}}?componentId={{ComponentID}}&access_token={{Token}}&fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"cms",
+								"{{CMSCatalog}}",
+								"versions",
+								"{{CatalogVersion}}",
+								"pages",
+								"{{PageID}}"
+							],
+							"query": [
+								{
+									"key": "componentId",
+									"value": "{{ComponentID}}"
+								},
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. You have to change the permission from \"Customer Oauth\" API\n\n-----------------------------------------------------------\n\n1. CMSCatalog: ygiordanob2c-saContentCatalog\n2. CatalogVersion: Online\n3. PageID: homepage\n4. ComponentID: you can get from \"Get Component By Page ID\" API\n5. Token: you can get from \"Customer Oauth\" API\n6. Fields: DEFAULT or FULL\n\n--------------------------------------------------------------\n\n1. This API set \"ComponentType\" as global value"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Component By Component Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "238373e6-21b9-420e-bfae-c49419edf281",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/users/{{UserID}}/cms/{{CMSCatalog}}/versions/{{CatalogVersion}}/pages/{{PageID}}/types/{{ComponentType}}?access_token={{Token}}&fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"users",
+								"{{UserID}}",
+								"cms",
+								"{{CMSCatalog}}",
+								"versions",
+								"{{CatalogVersion}}",
+								"pages",
+								"{{PageID}}",
+								"types",
+								"{{ComponentType}}"
+							],
+							"query": [
+								{
+									"key": "access_token",
+									"value": "{{Token}}"
+								},
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. You have to change the permission from \"Customer Oauth\" API\n\n-----------------------------------------------------------\n\n1. CMSCatalog: ygiordanob2c-saContentCatalog\n2. CatalogVersion: Online\n3. PageID: homepage\n4. ComponentType: you can get from \"Get Component By Component ID\" API\n5. Token: you can get from \"Customer Oauth\" API\n6. Fields: DEFAULT or FULL"
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2b1c5cb0-d580-46cb-851c-2401d998f6e2",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "e1539ed7-6b79-457a-8330-1e1e4ab1034c",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Miscs Controller",
+			"item": [
+				{
+					"name": "Store Config",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "dc3b98ae-7939-43dc-ad63-4198a2da3bfd",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/store-configs?fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"store-configs"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. Fields: DEFAULT or FULL"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Currencies",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c4586c44-8053-46de-a10a-138c7d7d60c1",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/currencies?fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"currencies"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. Fields: DEFAULT or FULL"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Languages",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "775c24d0-f473-4b06-afe2-f9eb86f5ea22",
+								"exec": [
+									"pm.test(\"Validate status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/languages?fields={{Fields}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"languages"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								}
+							]
+						},
+						"description": "1. Fields: DEFAULT or FULL"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Groups Of Ages",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e3ea57b3-946a-49d7-a8b8-e3832114e787",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.globals.set(\"AgeGroups\", response.ageGroups[0].code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/groups-of-ages?fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"groups-of-ages"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. Fields: DEFAULT or FULL\n2. Lang (Language): en OR ar\n\n\n1. This API set AgeGroups as global variable"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Country Of Residence",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "6e621a03-a8f7-422e-b4f2-f991500e0c58",
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.globals.set(\"CountryName\", response.countries[192].name);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/rest/v2/{{BaseSite}}/countries-of-residence?fields={{Fields}}&lang={{Lang}}",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"rest",
+								"v2",
+								"{{BaseSite}}",
+								"countries-of-residence"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "{{Fields}}"
+								},
+								{
+									"key": "lang",
+									"value": "{{Lang}}"
+								}
+							]
+						},
+						"description": "1. Fields: DEFAULT or FULL\r\n2. Lang (Language): en OR ar\r\n\r\n\r\n1. This API set CountryName as global variable"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
